@@ -1,11 +1,11 @@
 # SP-27-BlueSpotify
 
 #### Table of Contents
--[Overview](#overview)
--[Team Members](#team-members)
--[Cloning](#cloning)
--[Branch and Push Rules](#branch-and-push-rules)
--[Pull Requests](#pull-requests)
+- [Overview](#overview)
+- [Team Members](#team-members)
+- [Cloning](#cloning)
+- [Branch and Push Rules](#branch-and-push-rules)
+- [Pull Requests](#pull-requests)
 
 ## Overview
 This will serve as our implementation for the Spotify application. This README will have notes about a few things, such as branch and push rules and will expand as needed. Please read the entire README. Thanks :)
