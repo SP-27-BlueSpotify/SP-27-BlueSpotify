@@ -6,28 +6,31 @@
 - [Cloning](#cloning)
 - [Branch and Push Rules](#branch-and-push-rules)
 - [Pull Requests](#pull-requests)
-
+- [References](#references)
 ## Overview
 This will serve as our implementation for the Spotify application. This README will have notes about a few things, such as branch and push rules and will expand as needed. Please read the entire README. Thanks :)
 
 ## Team Members
-- Will provide names of team members and GitHub accounts
+- [Trey Morris - Team Lead](https://github.com/TreyBMorris)
+- [Chris Brown - Developer](https://github.com/P-Coder258)
+- [David Clarke - Documentation](https://github.com/davidhclarke02)
+- [Ethan Sutton - Documentation](https://github.com/Esutton24)
 
 ## Cloning
 Read through the entire README file in the repository before cloning!!
 1. Install the latest version of Node.js and Node Package Manager (NPM).
 2. Verify your install
 ```bash
-# verifies the right Node.js version is in the environment
-node -v # should print `v23.6.0`
+# Verify the right Node.js version 
+node -v 
 
-# verifies the right NPM version is in the environment
-npm -v # should print `11.0.0`
+# Verify the right NPM version 
+npm -v 
 
 ```
 3. Clone the GitHub repository. Using the command-line you can run,
 ```bash
-git clone <repository_url>
+git clone https://github.com/SP-27-BlueSpotify/SP-27-BlueSpotify.git
 ```
 Then switch to the develop branch by running, 
 ```bash
@@ -49,4 +52,10 @@ npm start
 
 
 ## Pull Requests
-We will try our best to adhear to the Git Flow work flow when working on our project. [Link here](https://www.gitkraken.com/learn/git/git-flow) When opening a PR, make sure you are trying to merge into the develop branch, and not the main branch. Give your PR a descriptive name including the name of the branch. For example, "feature/MainPageButton | Adding a Button to the Main Page". Then, make sure you add screenshots or a video of your changes (video not required) to make it easy to know what the changes are. In the PR make sure to add comments about what your changes do and make sure that you tested as much as possible. Then when you are ready, request a review from Trey and he will get your PR reviewed and merged into develop within 1-2 days. 
+We will try our best to adhear to the Git Flow work flow when working on our project. When opening a PR, make sure you are trying to merge into the develop branch, and not the main branch. Give your PR a descriptive name including the name of the branch. For example, "feature/MainPageButton | Adding a Button to the Main Page". Then, make sure you add screenshots or a video of your changes (video not required) to make it easy to know what the changes are. In the PR make sure to add comments about what your changes do and make sure that you tested as much as possible. Then when you are ready, request a review from Trey and he will get your PR reviewed and merged into develop within 1-2 days.
+
+## References
+1. [GitFlow](https://www.gitkraken.com/learn/git/git-flow)
+2. [Expo](https://expo.dev)
+3. [React Native](https://reactnative.dev/)
+4. [Spotify API](https://developer.spotify.com/documentation/web-api)
