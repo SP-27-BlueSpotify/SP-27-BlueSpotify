@@ -29,8 +29,14 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
-.env*.local
+
+ *.local
+
+# Ignore the .env file (contains sensitive data)
+.env
+
+# Do not ignore .developer.env (example file)
+!.developer.env
 
 # typescript
 *.tsbuildinfo
