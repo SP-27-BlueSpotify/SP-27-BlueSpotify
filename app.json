@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "SP-27-BlueSpotify",
-    "slug": "SP-27-BlueSpotify",
+    "slug": "sp-27-bluespotify",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -23,6 +23,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "3b67cf5b-5574-4662-866a-ce67643c45fc"
+      }
+    },
+    "owner": "treymorris"
   }
 }

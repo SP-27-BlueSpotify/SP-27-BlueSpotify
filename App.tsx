@@ -1,22 +1,18 @@
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import {PROJECT_NAME} from '@env';
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <Text>{PROJECT_NAME}</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+import { SpotifyAuthProvider } from './context/SpotifyAuthContext';
+import AppNavigator from './navigation/AppNavigator';
+import * as WebBrowser from 'expo-web-browser';
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+WebBrowser.maybeCompleteAuthSession();
+
+const App: React.FC = () => {
+  return (
+      <SpotifyAuthProvider>
+        <AppNavigator />
+        <StatusBar style="auto" />
+      </SpotifyAuthProvider>
+  );
+};
+
+export default App;
