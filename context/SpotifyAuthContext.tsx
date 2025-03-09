@@ -11,6 +11,8 @@ const SCOPES = [
     "user-read-email",
     "user-read-playback-state",
     "user-modify-playback-state",
+    "playlist-modify-public",
+    "playlist-modify-private"
 ];
 
 // Discovery document for OAuth flow

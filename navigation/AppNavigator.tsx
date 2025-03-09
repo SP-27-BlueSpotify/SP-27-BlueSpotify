@@ -26,7 +26,7 @@ function PlaylistStack() {
                 },
             }}
         >
-            <Stack.Screen name="Playlists" component={PlaylistsScreen} />
+            <Stack.Screen name="Playlists" component={PlaylistsScreen} options={{ headerShown: false }} />
             <Stack.Screen name="PlaylistDetails" component={PlaylistDetailScreen} />
         </Stack.Navigator>
     );
