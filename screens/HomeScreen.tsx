@@ -3,7 +3,7 @@ import { Button, View, Text, ActivityIndicator, StyleSheet, Image, FlatList, Ref
 import { useSpotifyAuth } from '../context/SpotifyAuthContext';
 
 const HomeScreen: React.FC = () => {
-    const { token, logout } = useSpotifyAuth();
+    const { token } = useSpotifyAuth();
     const [userData, setUserData] = useState<any>(null);
     const [playlists, setPlaylists] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
@@ -18,7 +18,7 @@ const HomeScreen: React.FC = () => {
 
     const fetchUserData = async () => {
         setLoading(true);
-        setError(null); // Reset error on refresh
+        setError(null);
         try {
             const userResponse = await fetch('https://api.spotify.com/v1/me', {
                 headers: {
@@ -48,13 +48,13 @@ const HomeScreen: React.FC = () => {
             }
 
             const playlistsData = await playlistsResponse.json();
-            setPlaylists(playlistsData.items.slice(0, 2)); // Get only the 2 most recent playlists
+            setPlaylists(playlistsData.items.slice(0, 2));
         } catch (err: any) {
             console.error('Error fetching user data:', err);
             setError('Failed to fetch user data');
         } finally {
             setLoading(false);
-            setRefreshing(false); // Stop the refresh animation
+            setRefreshing(false);
         }
     };
 
@@ -102,7 +102,7 @@ const HomeScreen: React.FC = () => {
     return (
         <ScrollView
             style={styles.container}
-            contentContainerStyle={styles.scrollContent} // Use contentContainerStyle instead
+            contentContainerStyle={styles.scrollContent}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
             {userData ? (
@@ -121,8 +121,6 @@ const HomeScreen: React.FC = () => {
             <View style={styles.playlistList}>
                 {playlists.map((playlist) => renderPlaylistItem(playlist))}
             </View>
-
-            <Button title="Logout" onPress={logout} />
         </ScrollView>
     );
 };

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, TextInput, Button, Alert, RefreshControl } from 'react-native';
+import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, Alert, Modal, TextInput, Button } from 'react-native';
 import { useSpotifyAuth } from '../context/SpotifyAuthContext';
-import Icon from 'react-native-vector-icons/MaterialIcons'; // You can adjust the icon library as needed
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const PlaylistDetailScreen: React.FC<any> = ({ route, navigation }) => {
     const { playlist } = route.params;
@@ -11,7 +11,7 @@ const PlaylistDetailScreen: React.FC<any> = ({ route, navigation }) => {
     const [loading, setLoading] = useState<boolean>(true);
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [searchResults, setSearchResults] = useState<any[]>([]);
-    const [refreshing, setRefreshing] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
 
     useEffect(() => {
         if (playlist.name) {
@@ -46,7 +46,7 @@ const PlaylistDetailScreen: React.FC<any> = ({ route, navigation }) => {
 
             if (response.ok) {
                 setTracks(data.items);
-                setFilteredTracks(data.items); // Initially, show all tracks
+                setFilteredTracks(data.items);
                 setLoading(false);
             } else {
                 console.error('Failed to fetch tracks:', data);
@@ -98,8 +98,14 @@ const PlaylistDetailScreen: React.FC<any> = ({ route, navigation }) => {
             });
 
             if (response.ok) {
-                fetchTracks(playlist.id);
+                const newTrack = { track: song };
+                setTracks((prevTracks) => [...prevTracks, newTrack]);
+                setFilteredTracks((prevTracks) => [...prevTracks, newTrack]);
                 Alert.alert('Success', 'Song added to the playlist.');
+                setModalVisible(false);
+                setSearchQuery('');
+                setSearchResults([]);
+                fetchTracks(playlist.id);
             } else {
                 console.error('Failed to add song:', await response.json());
             }
@@ -110,63 +116,44 @@ const PlaylistDetailScreen: React.FC<any> = ({ route, navigation }) => {
 
     const deleteSongFromPlaylist = async (song: any) => {
         if (tracks.length === 1) {
-            Alert.alert('Cannot delete song', 'This is the only song in the playlist. You cannot delete it.');
+            Alert.alert('Error', 'Cannot delete the only song in the playlist.');
             return;
         }
 
-        Alert.alert(
-            'Delete Song',
-            `Are you sure you want to delete ${song.track.name}?`,
-            [
-                {
-                    text: 'Cancel',
-                    style: 'cancel',
+        try {
+            const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist.id}/tracks`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
                 },
-                {
-                    text: 'Delete',
-                    onPress: async () => {
-                        try {
-                            const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist.id}/tracks`, {
-                                method: 'DELETE',
-                                headers: {
-                                    Authorization: `Bearer ${token}`,
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    tracks: [
-                                        {
-                                            uri: `spotify:track:${song.track.id}`,
-                                        },
-                                    ],
-                                }),
-                            });
+                body: JSON.stringify({
+                    tracks: [{ uri: `spotify:track:${song.id}` }],
+                }),
+            });
 
-                            if (response.ok) {
-                                fetchTracks(playlist.id);
-                                Alert.alert('Success', 'Song deleted from the playlist.');
-                            } else {
-                                console.error('Failed to delete song:', await response.json());
-                            }
-                        } catch (error) {
-                            console.error('Error deleting song:', error);
-                        }
-                    },
-                },
-            ],
-            { cancelable: true }
-        );
-    };
-
-    const handleRefresh = async () => {
-        setRefreshing(true);
-        await fetchTracks(playlist.id); // Re-fetch the tracks and playlist data
-        setRefreshing(false);
+            if (response.ok) {
+                setTracks((prevTracks) => prevTracks.filter((track) => track.track.id !== song.id));
+                setFilteredTracks((prevTracks) => prevTracks.filter((track) => track.track.id !== song.id));
+                Alert.alert('Success', 'Song removed from the playlist.');
+            } else {
+                console.error('Failed to delete song:', await response.json());
+            }
+        } catch (error) {
+            console.error('Error deleting song:', error);
+        }
     };
 
     const renderTrack = ({ item }: { item: any }) => (
         <TouchableOpacity
             style={styles.trackItem}
-            onLongPress={() => deleteSongFromPlaylist(item)}>
+            onLongPress={() =>
+                Alert.alert('Delete song', 'Are you sure you want to delete this song?', [
+                    { text: 'Cancel' },
+                    { text: 'Delete', onPress: () => deleteSongFromPlaylist(item.track) },
+                ])
+            }
+        >
             <Text style={styles.trackName}>{item.track.name}</Text>
             <Text style={styles.artistName}>
                 {item.track.artists.map((artist: any) => artist.name).join(', ')}
@@ -192,17 +179,10 @@ const PlaylistDetailScreen: React.FC<any> = ({ route, navigation }) => {
         />
     );
 
-    const renderAddSongInput = () => (
-        <View style={styles.addSongContainer}>
-            <TextInput
-                style={styles.searchInput}
-                placeholder="Search for a song"
-                placeholderTextColor="#aaa"
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-            />
-            <Button title="Search" onPress={searchSong} color="#1DB954" />
-        </View>
+    const renderAddSongButton = () => (
+        <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.addButton}>
+            <Icon name="add" size={30} color="#fff" />
+        </TouchableOpacity>
     );
 
     return (
@@ -211,9 +191,7 @@ const PlaylistDetailScreen: React.FC<any> = ({ route, navigation }) => {
             <Text style={styles.name}>{playlist.name}</Text>
             <Text style={styles.description}>{playlist.description}</Text>
 
-            {renderAddSongInput()}
-
-            {searchQuery && renderSearchResults()}
+            {renderAddSongButton()}
 
             {loading ? (
                 <Text style={styles.loadingText}>Loading tracks...</Text>
@@ -223,11 +201,43 @@ const PlaylistDetailScreen: React.FC<any> = ({ route, navigation }) => {
                     keyExtractor={(item) => item.track.id}
                     renderItem={renderTrack}
                     style={styles.trackList}
-                    refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-                    }
                 />
             )}
+
+            <Modal
+                visible={modalVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => {
+                    setModalVisible(false);
+                    setSearchQuery('');
+                    setSearchResults([]);
+                }}>
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.searchWrapper}>
+                            <TextInput
+                                style={styles.searchInput}
+                                placeholder="Search for a song"
+                                placeholderTextColor="#aaa"
+                                value={searchQuery}
+                                onChangeText={setSearchQuery}
+                            />
+                            <TouchableOpacity onPress={searchSong} style={styles.button}>
+                                <Icon name="search" size={30} color="#1DB954" />
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => {
+                                setModalVisible(false);
+                                setSearchQuery('');
+                                setSearchResults([]);
+                            }} style={styles.button}>
+                                <Icon name="close" size={30} color="#ff4d4d" />
+                            </TouchableOpacity>
+                        </View>
+                        {renderSearchResults()}
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 };
@@ -277,21 +287,52 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#fff',
     },
-    addSongContainer: {
+    addButton: {
+        position: 'absolute',
+        top: 40,
+        right: 20,
+        backgroundColor: '#1DB954',
+        padding: 15,
+        borderRadius: 30,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+        width: '90%', // Increased width
+        height: '60%', // Set fixed height
+        padding: 20,
+        backgroundColor: '#1e1e1e',
+        borderRadius: 10,
+    },
+    searchWrapper: {
+        flexDirection: 'row', // Align buttons and input horizontally
+        alignItems: 'center', // Center vertically
         width: '100%',
-        marginVertical: 10,
+        marginBottom: 10, // Optional: Add space between input and results
     },
     searchInput: {
-        width: '100%',
+        flex: 1, // Input takes most of the space
         height: 40,
         paddingHorizontal: 10,
         backgroundColor: '#333',
         borderRadius: 20,
         color: '#fff',
     },
+    button: {
+        marginLeft: 10, // Space between input and buttons
+    },
     searchResultsList: {
         marginTop: 10,
         width: '100%',
+        maxHeight: 300,
     },
     searchResultItem: {
         padding: 10,
