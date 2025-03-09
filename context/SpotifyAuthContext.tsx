@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { useAuthRequest, makeRedirectUri, exchangeCodeAsync } from "expo-auth-session";
 import { CLIENT_ID, CLIENT_SECRET } from '@env';
+import { Alert } from 'react-native'; // Import Alert for confirmation
 
 // Use makeRedirectUri to get the correct URI for Expo
 const REDIRECT_URI = makeRedirectUri();
@@ -73,7 +74,23 @@ export const SpotifyAuthProvider: React.FC<{ children: React.ReactNode }> = ({ c
     };
 
     const logout = () => {
-        setToken(null); // Clear the token on logout
+        // Show a confirmation alert before logging out
+        Alert.alert(
+            'Confirm Logout',
+            'Are you sure you want to log out?',
+            [
+                {
+                    text: 'Cancel',
+                    onPress: () => console.log('Logout canceled'),
+                    style: 'cancel',
+                },
+                {
+                    text: 'OK',
+                    onPress: () => setToken(null), // Clear the token on logout
+                },
+            ],
+            { cancelable: true }
+        );
     };
 
     return (

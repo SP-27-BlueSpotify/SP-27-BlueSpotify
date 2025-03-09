@@ -9,6 +9,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSpotifyAuth } from '../context/SpotifyAuthContext';
 import PlaylistDetailScreen from '../screens/PlaylistDetailScreen';
 import { Button } from 'react-native';
+import UserProfileScreen from "../screens/UserProfileScreen";
+import { TransitionSpecs} from "@react-navigation/bottom-tabs";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -33,7 +35,7 @@ function PlaylistStack() {
 }
 
 export default function AppNavigator() {
-    const { token, logout } = useSpotifyAuth(); // Assuming you have a `logout` function in your context
+    const { token, logout } = useSpotifyAuth();
 
     return (
         <NavigationContainer>
@@ -46,7 +48,10 @@ export default function AppNavigator() {
                             iconName = focused ? 'musical-notes' : 'musical-notes-outline';
                         } else if (route.name === 'Home') {
                             iconName = focused ? 'home' : 'home-outline';
-                        } else if (route.name === 'Login') {
+                        } else if(route.name === 'User'){
+                            iconName = focused ? 'person' : 'person-outline';
+                        }
+                        else if (route.name === 'Login') {
                             iconName = focused ? 'log-in' : 'log-in-outline';
                         }
 
@@ -61,6 +66,7 @@ export default function AppNavigator() {
                         backgroundColor: '#121212',
                     }
                 })}
+
             >
                 {token ? (
                     <>
@@ -78,6 +84,7 @@ export default function AppNavigator() {
                                 headerShown: false
                             }}
                         />
+                        <Tab.Screen name="User" component={UserProfileScreen} options={{ headerShown: false }} />
                     </>
                 ) : (
                     <Tab.Screen name="Login" component={LoginScreen} />
