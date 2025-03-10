@@ -12,6 +12,7 @@ import { Button } from 'react-native';
 import UserProfileScreen from "../screens/UserProfileScreen";
 import { TransitionSpecs} from "@react-navigation/bottom-tabs";
 import MusicPlayerScreen from "../screens/MusicPlayerScreen";
+import SearchScreen from "../screens/SearchScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -66,7 +67,10 @@ export default function AppNavigator() {
                             iconName = focused ? 'musical-notes' : 'musical-notes-outline';
                         } else if (route.name === 'Home') {
                             iconName = focused ? 'home' : 'home-outline';
-                        } else if(route.name === 'User'){
+                        }else if(route.name === 'Search'){
+                            iconName = focused ? 'search' : 'search-outline';
+                        }
+                        else if(route.name === 'User'){
                             iconName = focused ? 'person' : 'person-outline';
                         }
                         else if (route.name === 'Login') {
@@ -93,6 +97,13 @@ export default function AppNavigator() {
                         <Tab.Screen
                             name="Home"
                             component={HomeStack}
+                            options={{
+                                headerShown: false
+                            }}
+                        />
+                        <Tab.Screen
+                            name="Search"
+                            component={SearchScreen}
                             options={{
                                 headerShown: false
                             }}
