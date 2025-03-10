@@ -52,6 +52,9 @@ const MusicPlayerScreen: React.FC<any> = ({ navigation }) => {
         setTimeout(() => {
             fetchCurrentPlayback();
         }, 250);
+        setTimeout(() => {
+            fetchCurrentPlayback();
+        }, 500);
     };
 
     const handlePlayPause = async () => {
@@ -89,7 +92,7 @@ const MusicPlayerScreen: React.FC<any> = ({ navigation }) => {
             });
 
             if (response.ok) {
-                refreshCurrentTrack(); // Refresh track info after switching
+                refreshCurrentTrack();
             }
         } catch (error) {
             console.error('Error skipping track:', error);
@@ -106,7 +109,7 @@ const MusicPlayerScreen: React.FC<any> = ({ navigation }) => {
             });
 
             if (response.ok) {
-                refreshCurrentTrack(); // Refresh track info after going back
+                refreshCurrentTrack();
             }
         } catch (error) {
             console.error('Error going to previous track:', error);
