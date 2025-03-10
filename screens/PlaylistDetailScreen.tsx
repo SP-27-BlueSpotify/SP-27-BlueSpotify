@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, Alert, Modal, TextInput, Button } from 'react-native';
+import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, Alert, Modal, TextInput } from 'react-native';
 import { useSpotifyAuth } from '../context/SpotifyAuthContext';
 import Icon from 'react-native-vector-icons/Ionicons';
 
@@ -72,7 +72,7 @@ const PlaylistDetailScreen: React.FC<any> = ({ route, navigation }) => {
             if (response.ok) {
                 setSearchResults(data.tracks.items);
             } else {
-                console.error('Failed to search songs:', data);
+                Alert.alert('Failed to find songs');
             }
         } catch (error) {
             console.error('Error searching for song:', error);
@@ -143,10 +143,90 @@ const PlaylistDetailScreen: React.FC<any> = ({ route, navigation }) => {
             console.error('Error deleting song:', error);
         }
     };
+    const checkPlayerState = async () => {
+        try {
+            const response = await fetch('https://api.spotify.com/v1/me/player', {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const data = await response.json();
+            if (data.device && data.is_playing) {
+                console.log('Player is ready and active');
+                return true;
+            } else {
+                console.log('No active player or music is not playing');
+                return false;
+            }
+        } catch (error) {
+            console.log('Error checking player state:', error);
+            return false;
+        }
+    };
+
+    const handlePlaySong = async (songUri: string) => {
+        const isPlayerActive = await checkPlayerState();
+        if (!isPlayerActive) {
+            Alert.alert('No active player', 'Please make sure your Spotify player is ready.');
+            return;
+        }
+
+        try {
+            const response = await fetch('https://api.spotify.com/v1/me/player/play', {
+                method: 'PUT',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    uris: [songUri],
+                }),
+            });
+
+            if (response.ok) {
+                navigation.navigate('Now Playing', { songUri });
+            } else {
+                console.error('Failed to play song:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error playing song:', error);
+        }
+    };
+
+    const handlePlayPlaylist = async () => {
+        const uris = tracks.map((track) => track.track.uri);
+        const isPlayerActive = await checkPlayerState();
+        if (!isPlayerActive) {
+            Alert.alert('No active player', 'Please make sure your Spotify player is ready.');
+            return;
+        }
+        try {
+            const response = await fetch('https://api.spotify.com/v1/me/player/play', {
+                method: 'PUT',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    uris,
+                }),
+            });
+
+            if (response.ok) {
+                navigation.navigate('Now Playing', { uris });
+            } else {
+                console.error('Failed to play playlist:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error playing playlist:', error);
+        }
+    };
 
     const renderTrack = ({ item }: { item: any }) => (
         <TouchableOpacity
             style={styles.trackItem}
+            onPress={() => handlePlaySong(item.track.uri)}
             onLongPress={() =>
                 Alert.alert('Delete song', 'Are you sure you want to delete this song?', [
                     { text: 'Cancel' },
@@ -179,19 +259,21 @@ const PlaylistDetailScreen: React.FC<any> = ({ route, navigation }) => {
         />
     );
 
-    const renderAddSongButton = () => (
-        <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.addButton}>
-            <Icon name="add" size={30} color="#fff" />
-        </TouchableOpacity>
-    );
-
     return (
         <View style={styles.container}>
             <Image source={{ uri: playlist.images[0].url }} style={styles.image} />
             <Text style={styles.name}>{playlist.name}</Text>
             <Text style={styles.description}>{playlist.description}</Text>
 
-            {renderAddSongButton()}
+            <View style={styles.buttonContainer}>
+                <TouchableOpacity onPress={handlePlayPlaylist} style={styles.iconButton}>
+                    <Icon name="play" size={30} color="#fff" />
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.iconButton}>
+                    <Icon name="add" size={30} color="#fff" />
+                </TouchableOpacity>
+            </View>
 
             {loading ? (
                 <Text style={styles.loadingText}>Loading tracks...</Text>
@@ -281,23 +363,33 @@ const styles = StyleSheet.create({
     },
     artistName: {
         fontSize: 14,
-        color: '#aaa',
+        color: '#bbb',
     },
-    loadingText: {
-        fontSize: 16,
-        color: '#fff',
+    buttonContainer: {
+        flexDirection: 'row',
+        marginTop: 20,
     },
-    addButton: {
-        position: 'absolute',
-        top: 40,
-        right: 20,
+    iconButton: {
+        marginHorizontal: 10,
         backgroundColor: '#1DB954',
         padding: 15,
-        borderRadius: 30,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.2,
-        shadowRadius: 3,
+        borderRadius: 50,
+    },
+    searchWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 10,
+    },
+    searchInput: {
+        flex: 1,
+        padding: 10,
+        borderRadius: 20,
+        backgroundColor: '#222',
+        color: '#fff',
+        height: 40,
+    },
+    button: {
+        marginLeft: 10,
     },
     modalContainer: {
         flex: 1,
@@ -307,35 +399,18 @@ const styles = StyleSheet.create({
     },
     modalContent: {
         width: '90%',
-        height: '60%',
+        backgroundColor: '#121212',
         padding: 20,
-        backgroundColor: '#1e1e1e',
         borderRadius: 10,
+        maxHeight: '80%',
     },
-    searchWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        width: '100%',
-        marginBottom: 10,
-    },
-    searchInput: {
-        flex: 1,
-        height: 40,
-        paddingHorizontal: 10,
-        backgroundColor: '#333',
-        borderRadius: 20,
-        color: '#fff',
-    },
-    button: {
-        marginLeft: 10,
-    },
+
     searchResultsList: {
-        marginTop: 10,
-        width: '100%',
-        maxHeight: 300,
+        marginTop: 20,
+        maxHeight: '75%',
     },
     searchResultItem: {
-        padding: 10,
+        paddingVertical: 10,
         borderBottomWidth: 1,
         borderBottomColor: '#333',
     },
@@ -343,6 +418,18 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: '#fff',
     },
+    addButton: {
+        position: 'absolute',
+        bottom: 30,
+        right: 20,
+        backgroundColor: '#1DB954',
+        padding: 20,
+        borderRadius: 50,
+    },
+    loadingText: {
+        color: '#fff',
+    },
 });
+
 
 export default PlaylistDetailScreen;

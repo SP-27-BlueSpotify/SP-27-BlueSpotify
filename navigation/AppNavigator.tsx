@@ -11,6 +11,7 @@ import PlaylistDetailScreen from '../screens/PlaylistDetailScreen';
 import { Button } from 'react-native';
 import UserProfileScreen from "../screens/UserProfileScreen";
 import { TransitionSpecs} from "@react-navigation/bottom-tabs";
+import MusicPlayerScreen from "../screens/MusicPlayerScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -26,6 +27,7 @@ function HomeStack() {
         >
             <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
             <Stack.Screen name="PlaylistDetail" component={PlaylistDetailScreen} />
+            <Stack.Screen name="Now Playing" component={MusicPlayerScreen} options={{ headerShown: false }} />
         </Stack.Navigator>
     );
 }
@@ -45,6 +47,7 @@ function PlaylistStack() {
         >
             <Stack.Screen name="Playlists" component={PlaylistsScreen} options={{ headerShown: false }} />
             <Stack.Screen name="PlaylistDetails" component={PlaylistDetailScreen} />
+            <Stack.Screen name="Now Playing" component={MusicPlayerScreen} options={{ headerShown: false }} />
         </Stack.Navigator>
     );
 }
@@ -68,6 +71,8 @@ export default function AppNavigator() {
                         }
                         else if (route.name === 'Login') {
                             iconName = focused ? 'log-in' : 'log-in-outline';
+                        }else if (route.name === 'Now Playing') {
+                            iconName = focused ? 'play' : 'play-outline';
                         }
 
                         return <Ionicons name={iconName} size={size} color={color} />;
@@ -95,6 +100,13 @@ export default function AppNavigator() {
                         <Tab.Screen
                             name="Playlists"
                             component={PlaylistStack}
+                            options={{
+                                headerShown: false
+                            }}
+                        />
+                        <Tab.Screen
+                            name="Now Playing"
+                            component={MusicPlayerScreen}
                             options={{
                                 headerShown: false
                             }}

@@ -13,7 +13,13 @@ const SCOPES = [
     "user-read-playback-state",
     "user-modify-playback-state",
     "playlist-modify-public",
-    "playlist-modify-private"
+    "playlist-modify-private",
+    "streaming",
+    "app-remote-control",
+    "user-read-currently-playing",
+    "user-follow-read",
+    "user-library-read",
+    "playlist-read-private",
 ];
 
 // Discovery document for OAuth flow
