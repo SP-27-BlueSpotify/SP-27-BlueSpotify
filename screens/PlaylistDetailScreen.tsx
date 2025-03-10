@@ -306,20 +306,20 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContent: {
-        width: '90%', // Increased width
-        height: '60%', // Set fixed height
+        width: '90%',
+        height: '60%',
         padding: 20,
         backgroundColor: '#1e1e1e',
         borderRadius: 10,
     },
     searchWrapper: {
-        flexDirection: 'row', // Align buttons and input horizontally
-        alignItems: 'center', // Center vertically
+        flexDirection: 'row',
+        alignItems: 'center',
         width: '100%',
-        marginBottom: 10, // Optional: Add space between input and results
+        marginBottom: 10,
     },
     searchInput: {
-        flex: 1, // Input takes most of the space
+        flex: 1,
         height: 40,
         paddingHorizontal: 10,
         backgroundColor: '#333',
@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
         color: '#fff',
     },
     button: {
-        marginLeft: 10, // Space between input and buttons
+        marginLeft: 10,
     },
     searchResultsList: {
         marginTop: 10,

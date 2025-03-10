@@ -15,6 +15,21 @@ import { TransitionSpecs} from "@react-navigation/bottom-tabs";
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
+
+function HomeStack() {
+    return (
+        <Stack.Navigator
+            screenOptions={{
+                headerStyle: { backgroundColor: '#121212' },
+                headerTintColor: '#fff',
+            }}
+        >
+            <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="PlaylistDetail" component={PlaylistDetailScreen} />
+        </Stack.Navigator>
+    );
+}
+
 function PlaylistStack() {
     return (
         <Stack.Navigator
@@ -72,7 +87,7 @@ export default function AppNavigator() {
                     <>
                         <Tab.Screen
                             name="Home"
-                            component={HomeScreen}
+                            component={HomeStack}
                             options={{
                                 headerShown: false
                             }}

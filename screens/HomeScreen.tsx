@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Button, View, Text, ActivityIndicator, StyleSheet, Image, FlatList, RefreshControl, ScrollView } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, ActivityIndicator, StyleSheet, Image, FlatList, RefreshControl, TouchableOpacity } from 'react-native';
 import { useSpotifyAuth } from '../context/SpotifyAuthContext';
 
-const HomeScreen: React.FC = () => {
+const HomeScreen: React.FC<any> = ({ navigation }) => {
     const { token } = useSpotifyAuth();
     const [userData, setUserData] = useState<any>(null);
     const [playlists, setPlaylists] = useState<any[]>([]);
@@ -10,13 +10,14 @@ const HomeScreen: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [refreshing, setRefreshing] = useState<boolean>(false);
 
+
     useEffect(() => {
         if (token) {
             fetchUserData();
         }
     }, [token]);
 
-    const fetchUserData = async () => {
+    const fetchUserData = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
@@ -48,7 +49,7 @@ const HomeScreen: React.FC = () => {
             }
 
             const playlistsData = await playlistsResponse.json();
-            setPlaylists(playlistsData.items.slice(0, 2));
+            setPlaylists(playlistsData.items.slice(0, 4));
         } catch (err: any) {
             console.error('Error fetching user data:', err);
             setError('Failed to fetch user data');
@@ -56,7 +57,8 @@ const HomeScreen: React.FC = () => {
             setLoading(false);
             setRefreshing(false);
         }
-    };
+    }, [token]);
+
 
     const onRefresh = () => {
         setRefreshing(true);
@@ -74,7 +76,7 @@ const HomeScreen: React.FC = () => {
     if (loading) {
         return (
             <View style={styles.container}>
-                <ActivityIndicator size="large" color="#0000ff" />
+                <ActivityIndicator size="large" color="#1DB954" />
             </View>
         );
     }
@@ -89,100 +91,103 @@ const HomeScreen: React.FC = () => {
 
     const profileImageUrl = userData?.images[0]?.url || `https://ui-avatars.com/api/?name=${userData?.display_name}&background=1DB954&color=fff`;
 
-    const renderPlaylistItem = (item: any) => (
-        <View key={item.id} style={styles.playlistBox}>
+    const renderPlaylistItem = ({ item }: { item: any }) => (
+        <TouchableOpacity
+            key={item.id}
+            style={styles.playlistBox}
+            onPress={() => navigation.navigate('PlaylistDetail', { playlist: item })}
+        >
             <Image
-                source={{ uri: item.images[0]?.url || 'https://ui-avatars.com/api/?size=150&background=121212&color=fff&name=Playlist' }}
+                source={{ uri: item.images[0]?.url || 'https://ui-avatars.com/api/?size=150&background=333&color=fff&name=Playlist' }}
                 style={styles.playlistImage}
             />
-            <Text style={styles.playlistName}>{item.name}</Text>
-        </View>
+            <Text style={styles.playlistName} numberOfLines={1}>{item.name}</Text>
+        </TouchableOpacity>
     );
 
     return (
-        <ScrollView
-            style={styles.container}
-            contentContainerStyle={styles.scrollContent}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        >
-            {userData ? (
-                <>
-                    <Text style={styles.welcomeText}>Welcome, {userData.display_name}!</Text>
-                    <Image
-                        source={{ uri: profileImageUrl }}
-                        style={styles.profileImage}
-                    />
-                </>
-            ) : (
-                <Text style={styles.text}>No user data available</Text>
-            )}
-
-            <Text style={styles.text}>Recent Playlists:</Text>
-            <View style={styles.playlistList}>
-                {playlists.map((playlist) => renderPlaylistItem(playlist))}
+        <View style={styles.container}>
+            <View style={styles.header}>
+                <Text style={styles.headerText}>Good Morning, {userData?.display_name}</Text>
+                <Image
+                    source={{ uri: profileImageUrl }}
+                    style={styles.profileImage}
+                />
             </View>
-        </ScrollView>
+
+            <Text style={styles.playlistLabel}>Your Playlists</Text>
+
+            <FlatList
+                data={playlists}
+                renderItem={renderPlaylistItem}
+                keyExtractor={(item) => item.id}
+                numColumns={2}
+                columnWrapperStyle={styles.playlistRow}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                showsVerticalScrollIndicator={false}
+            />
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
-        paddingTop: 80,
+        backgroundColor: '#121212',
+        paddingTop: 50,
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingBottom: 20,
         backgroundColor: '#121212',
     },
-    scrollContent: {
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-    },
-    text: {
-        fontSize: 18,
-        color: '#333',
-    },
-    welcomeText: {
-        fontSize: 24,
+    headerText: {
+        fontSize: 22,
+        color: '#fff',
         fontWeight: 'bold',
-        color: '#1DB954',
-        textAlign: 'center',
-        marginBottom: 20,
     },
     profileImage: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-        marginBottom: 20,
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        marginLeft: 10,
     },
-    playlistList: {
-        marginTop: 20,
-        width: '100%',
-        justifyContent: 'center',
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 40,
+    playlistLabel: {
+        fontSize: 20,
+        color: '#fff',
+        fontWeight: 'bold',
+        paddingHorizontal: 20,
+        marginBottom: 10,
+    },
+    playlistRow: {
+        justifyContent: 'space-between',
+        paddingHorizontal: 20,
     },
     playlistBox: {
-        width: 150,
-        height: 200,
-        marginRight: 15,
-        marginBottom: 20,
         backgroundColor: '#333',
         borderRadius: 10,
+        width: '48%',
+        marginBottom: 15,
         padding: 10,
         alignItems: 'center',
-        justifyContent: 'space-between',
     },
     playlistImage: {
-        width: 130,
-        height: 130,
+        width: 120,
+        height: 120,
         borderRadius: 8,
-        marginBottom: 10,
+        marginBottom: 8,
     },
     playlistName: {
         fontSize: 16,
         color: '#fff',
         textAlign: 'center',
-        fontWeight: 'bold',
+    },
+    text: {
+        fontSize: 18,
+        color: '#fff',
     },
 });
 
