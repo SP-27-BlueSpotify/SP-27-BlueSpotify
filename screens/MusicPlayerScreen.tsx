@@ -48,7 +48,7 @@ const MusicPlayerScreen: React.FC<any> = ({ navigation }) => {
             setCurrentTrack(null);
             setIsPlaying(false);
             setCurrentTime(0);
-            console.error('Error fetching current playback:', error);
+            console.log('Error fetching current playback:', error);
         } finally {
             setLoading(false);
         }
