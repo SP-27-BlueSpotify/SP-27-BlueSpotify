@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Image } from 'react-native';
 import { useSpotifyAuth } from '../context/SpotifyAuthContext';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {useFocusEffect} from "@react-navigation/native";
+import { useFocusEffect } from "@react-navigation/native";
 
 const MusicPlayerScreen: React.FC<any> = ({ navigation }) => {
     const { token } = useSpotifyAuth();
     const [currentTrack, setCurrentTrack] = useState<any>(null);
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
+    const [currentTime, setCurrentTime] = useState<number>(0);
 
     useFocusEffect(
         React.useCallback(() => {
@@ -17,6 +18,7 @@ const MusicPlayerScreen: React.FC<any> = ({ navigation }) => {
             }
         }, [token])
     );
+
     const fetchCurrentPlayback = async () => {
         try {
             const response = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
@@ -31,22 +33,40 @@ const MusicPlayerScreen: React.FC<any> = ({ navigation }) => {
                 if (data && data.item) {
                     setCurrentTrack(data.item);
                     setIsPlaying(data.is_playing);
+                    setCurrentTime(data.progress_ms);
                 } else {
                     setCurrentTrack(null);
                     setIsPlaying(false);
+                    setCurrentTime(0);
                 }
             } else {
                 setCurrentTrack(null);
                 setIsPlaying(false);
+                setCurrentTime(0);
             }
         } catch (error) {
             setCurrentTrack(null);
             setIsPlaying(false);
+            setCurrentTime(0);
             console.error('Error fetching current playback:', error);
         } finally {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+
+        if (isPlaying) {
+            interval = setInterval(() => {
+                fetchCurrentPlayback();
+            }, 5000);
+        }
+
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [isPlaying]);
 
     const refreshCurrentTrack = async () => {
         setTimeout(() => {
@@ -116,6 +136,13 @@ const MusicPlayerScreen: React.FC<any> = ({ navigation }) => {
         }
     };
 
+    // Format the elapsed time into mm:ss
+    const formatTime = (ms: number) => {
+        const minutes = Math.floor(ms / 60000);
+        const seconds = Math.floor((ms % 60000) / 1000);
+        return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
+    };
+
     return (
         <View style={styles.container}>
             {loading ? (
@@ -127,7 +154,7 @@ const MusicPlayerScreen: React.FC<any> = ({ navigation }) => {
                     <Text style={styles.trackArtist}>{currentTrack.artists.map((artist: any) => artist.name).join(', ')}</Text>
                     <Text style={styles.trackAlbum}>{currentTrack.album.name}</Text>
                     <Text style={styles.trackDuration}>
-                        {`${Math.floor(currentTrack.duration_ms / 60000)}:${String(Math.floor((currentTrack.duration_ms % 60000) / 1000)).padStart(2, '0')}`}
+                        {`${formatTime(currentTime)} / ${formatTime(currentTrack.duration_ms)}`}
                     </Text>
                 </View>
             ) : (
